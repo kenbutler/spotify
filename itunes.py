@@ -3,13 +3,13 @@ import os
 import sys
 import xml.etree.ElementTree as ET
 
-logging.basicConfig(
-    filename=os.path.join(os.getcwd(), "transfer.txt"),
-    filemode='w',
-    format='%(asctime)s %(levelname)-8s %(message)s',
-    level=logging.INFO,
-    datefmt='%Y-%m-%d %H:%M:%S')
-logging.getLogger().addHandler(logging.StreamHandler(sys.stdout))
+# logging.basicConfig(
+#     filename=os.path.join(os.getcwd(), "transfer.txt"),
+#     filemode='w',
+#     format='%(asctime)s %(levelname)-8s %(message)s',
+#     level=logging.INFO,
+#     datefmt='%Y-%m-%d %H:%M:%S')
+# logging.getLogger().addHandler(logging.StreamHandler(sys.stdout))
 
 
 def _create_itunes_tuple(song):
@@ -100,7 +100,7 @@ def read_itunes_library(xml_file_path: str, playlists_to_ignore: list = None):
         playlist_dicts[key] = (title, song_ids)  # Add to dictionary
 
     # Display information about playlist count
-    logging.info("{} playlists set for transfer".format(len(playlist_dicts.keys())))
+    logging.info("{} playlists set for transfer".format(len(playlist_dicts)))
 
     return song_dicts, playlist_dicts
 
@@ -110,3 +110,4 @@ if __name__ == '__main__':
         raise IOError("Not enough input arguments. See README for usage.")
     playlists_to_ignore = sys.argv[2].split(',')
     songs, playlists = read_itunes_library(sys.argv[1], playlists_to_ignore)
+    pass

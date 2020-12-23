@@ -36,7 +36,7 @@ def get_credentials(directory: str = os.path.expanduser('~'), filename: str = '.
         if len(lines) > 3:
             playlists_to_ignore = lines[3].split(',')
             logging.info("Ignoring playlists: {}".format([i for i in playlists_to_ignore]))
-        redirect_uri = "http://localhost:8080"
+        redirect_uri = "http://localhost:8080"  # This should open a browser for you
         logging.info("Acquired credentials")
         return username, SpotifyOAuth(client_id=id_num, client_secret=secret, redirect_uri=redirect_uri), \
                playlists_to_ignore
@@ -54,6 +54,10 @@ def create_playlist(auth_mgr: SpotifyOAuth, username: str, playlist_name: str):
     sp = spotipy.Spotify(auth_manager=auth_mgr)
     sp.user_playlist_create(username, playlist_name)
     return
+
+
+def add_tracks(auth_mgr: SpotifyOAuth, username: str, playlist_name: str, track_ids: list):
+    pass  # TODO
 
 
 def view_recently_played(auth_mgr: SpotifyOAuth):
@@ -86,13 +90,13 @@ def search(auth_mgr: SpotifyOAuth, track_name: str = None, artist: str = None, a
     id_matches = []
     for n, listing in enumerate(results['tracks']['items']):
         res_track = listing['name']
-        if track_name is not None and track_name != res_track:
+        if track_name is not None and track_name.lower() != res_track.lower():
             continue
         res_artist = listing['artists'][0]['name']
-        if artist is not None and artist != res_artist:
+        if artist is not None and artist.lower() != res_artist.lower():
             continue
         res_album = listing['album']['name']
-        if album is not None and album != res_album:
+        if album is not None and album.lower() != res_album.lower():
             continue
         res_id = listing['id']
         logging.info("\tFound '{}' by {} on album {} with ID = {}".format(res_track, res_artist, res_album, res_id))
@@ -122,11 +126,16 @@ def main():
     # Search for "Feel Good Inc" by Gorillaz
     id_matches = search(auth_mgr=auth_mgr, track_name="On Melancholy Hill", artist='Gorillaz')
 
-    # # Create playlist
-    # create_playlist(auth_mgr, username, 'testAPI')
-    #
+    # Create playlist
+    create_playlist(auth_mgr, username, 'testAPI')
+
+    # debug
+    matches = search(auth_mgr, track_name=songs['5140'][0], artist=songs['5140'][1], album=songs['5140'][2])
+
     # # View recently played
     # view_recently_played(auth_mgr)
+
+    pass
 
 
 if __name__ == '__main__':
