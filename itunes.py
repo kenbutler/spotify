@@ -2,6 +2,8 @@ import logging
 import os
 import sys
 import xml.etree.ElementTree as ET
+from pprint import pprint
+
 
 # logging.basicConfig(
 #     filename=os.path.join(os.getcwd(), "transfer.txt"),
@@ -24,7 +26,7 @@ def _create_itunes_tuple(song):
         idx_artist = 2 * keys.index('Artist') + 1
         artist = song[idx_artist].text
     except ValueError:
-        logging.warning("No artist present for '{}'".format(song_name))
+        logging.warning("\tNo artist present for '{}'".format(song_name))
         artist = None
 
     # Get album -- which may not be known/present
@@ -32,20 +34,23 @@ def _create_itunes_tuple(song):
         idx_album = 2 * keys.index('Album') + 1
         album = song[idx_album].text
     except ValueError:
-        logging.warning("No album present for '{}'".format(song_name))
+        logging.warning("\tNo album present for '{}'".format(song_name))
         album = None
 
     return song_name, artist, album
 
 
-def read_itunes_library(xml_file_path: str, playlists_to_ignore: list = None):
+def read_itunes_library(exported_library_filename: str = "Library.xml", playlists_to_ignore: list = None):
     """
     Read the iTunes library from a provided XML filepath
     NOTE: You CANNOT assume the ORDER or NUMBER of keys in each song or playlist
-    :param xml_file_path: Path to exported Library.xml file from iTunes
+    :param exported_library_filename: Name of XML file from iTunes library export
     :param playlists_to_ignore: Playlist titles to ignore while importing
     :return: None
     """
+    xml_file_path = os.path.join(os.getcwd(), 'res', exported_library_filename)
+    logging.info("Loading iTunes library from {}".format(xml_file_path))
+
     tree = ET.parse(xml_file_path)
     root = tree.getroot()
     raw_song_details = root.findall('./dict/dict/dict')
@@ -67,8 +72,6 @@ def read_itunes_library(xml_file_path: str, playlists_to_ignore: list = None):
     raw_playlist_details = root.findall('./dict/array/dict')
     playlist_dicts = {}
 
-    idx_title = 1
-
     for playlist in raw_playlist_details:
         """
         Store as tuple in dictionary
@@ -87,7 +90,7 @@ def read_itunes_library(xml_file_path: str, playlists_to_ignore: list = None):
 
         # Check if folder (ignore folders)
         if 'Folder' in all_keys:
-            logging.warning("Ignoring folder '{}'".format(title))
+            logging.warning("\tIgnoring folder '{}'".format(title))
             continue
 
         # Get playlist ID
@@ -100,7 +103,9 @@ def read_itunes_library(xml_file_path: str, playlists_to_ignore: list = None):
         playlist_dicts[key] = (title, song_ids)  # Add to dictionary
 
     # Display information about playlist count
-    logging.info("{} playlists set for transfer".format(len(playlist_dicts)))
+    logging.info("{} iTunes playlists set for transfer".format(len(playlist_dicts)))
+    pnames = [name for _, (name, _) in playlist_dicts.items()]
+    pprint(pnames)
 
     return song_dicts, playlist_dicts
 

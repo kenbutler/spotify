@@ -37,6 +37,7 @@ To use this project, follow these steps:
 Apple should default to the name of _Library.xml_, but other names are fine too.
 Make sure you export this to the resources directory of the repository.
 3. **Create a Spotify credentials file.**
+The default name for the Spotify credentials file is _spotify_credentials.txt_.
 The Spotify credentials file should follow this format:
 ```
 <username>
