@@ -32,12 +32,14 @@ def get_credentials(directory: str = os.path.expanduser('~'), filename: str = '.
         username = lines[0].replace('\n', '')
         id_num = lines[1].replace('\n', '')
         secret = lines[2].replace('\n', '')
+        playlists_to_ignore = []
         if len(lines) > 3:
-            redirect_uri = lines[3].replace('\n', '')
-        else:
-            redirect_uri = "http://localhost:8080"
+            playlists_to_ignore = lines[3].split(',')
+            logging.info("Ignoring playlists: {}".format([i for i in playlists_to_ignore]))
+        redirect_uri = "http://localhost:8080"
         logging.info("Acquired credentials")
-        return username, SpotifyOAuth(client_id=id_num, client_secret=secret, redirect_uri=redirect_uri)
+        return username, SpotifyOAuth(client_id=id_num, client_secret=secret, redirect_uri=redirect_uri),\
+               playlists_to_ignore
 
 
 def create_playlist(auth_mgr: SpotifyOAuth, username: str, playlist_name: str):
@@ -111,11 +113,11 @@ def main():
     """
 
     # Acquire credentials
-    username, auth_mgr = get_credentials()
+    username, auth_mgr, playlists_to_ignore = get_credentials()
 
     # Read in iTunes Library XML
     xml_path = os.path.join(os.getcwd(), 'Library.xml')
-    songs, playlists = read_itunes_library(xml_path)
+    songs, playlists = read_itunes_library(xml_path, playlists_to_ignore)
 
     # Search for "Feel Good Inc" by Gorillaz
     id_matches = search(auth_mgr=auth_mgr, track_name="On Melancholy Hill", artist='Gorillaz')
