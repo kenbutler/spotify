@@ -10,10 +10,14 @@ Alas, I am a software developer myself and refuse to be shutdown from this incon
 # Requirements
 Python 3.7+
 
-See _requirements.txt_ for requried Python packages
+See _requirements.txt_ for required Python packages
 
 # Caveats
 Learned a few things in this little escapade.
+- Spotify will not have access to _everything_ that is in your iTunes library.
+This is often either because
+    - Record agreements differing between Apple and Spotify, or
+    - You got songs from another application (_\*cough\*_illegally downloaded?_\*cough\*_) that had horribly-mangled track or artist names, which makes it hard to find matches.
 - While iTunes allows you to create folders for playlists, these folders are actually playlists themselves.
 No folders actually exist. I do a check to ensure no folders are added.
 - Playlist names must be unique.
