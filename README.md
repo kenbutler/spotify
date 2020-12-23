@@ -9,6 +9,7 @@ Alas, I am a software developer myself and refuse to be shutdown from this incon
 
 # Requirements
 Python 3.7+
+
 See _requirements.txt_ for requried Python packages
 
 # Caveats

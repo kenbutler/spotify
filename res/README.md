@@ -7,7 +7,7 @@ The Spotify credentials file should follow this format:
 <client secret>
 [comma-separated list of playlists names to ignore]
 ```
-
+To get your client ID and secret, checkout the [Authorization Guide](https://developer.spotify.com/documentation/general/guides/authorization-guide/).
 This transfer utility does _NOT_ assume that any playlists should be ignored. 
 There are some playlists that probably should be ignored though. For example:
 ```
