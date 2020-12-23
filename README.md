@@ -9,26 +9,19 @@ Alas, I am a software developer myself and refuse to be shutdown from this incon
 
 # Requirements
 Python 3.7+
+See _requirements.txt_ for requried Python packages
 
-(See _requirements.txt_ for confirmation)
-
-| Package | Version |
-|:---:|:---:|
-| certifi | 2020.4.5.1 |
-| chardet | 3.0.4 |
-| future | 0.18.2 |
-| idna | 2.9 |
-| joblib | 0.14.1 |
-| numpy | 1.18.4 |
-| pandas | 0.24.2 |
-| Pillow | 7.1.2 |
-| python-dateutil | 2.8.1 |
-| pytz | 2020.1 |
-| requests | 2.23.0 |
-| scikit-learn | 0.22.2.post1 |
-| scipy | 1.4.1 |
-| six | 1.15.0 |
-| urllib3 | 1.25.9 |
+# Caveats
+Learned a few things in this little escapade.
+- While iTunes allows you to create folders for playlists, these folders are actually playlists themselves.
+No folders actually exist. I do a check to ensure no folders are added.
+- Playlist names must be unique.
+Though iTunes allows you to name playlists with duplicate names, they still track them behind the scenes with unique IDs.
+When transferring playlists to Spotify, though, it's pretty important to make sure all your iTunes playlist names are unique.
+You might otherwise end up with a merging of two different playlists with the same name.
+- Spotify's REST API places limits on queries.
+For example, you can only query the names of 50 playlists at a time, or add 100 tracks to a playlist at a time.
+I've handled these sort of limits (at least the ones I've encountered so far) in the code.
 
 # How to Use
 To use this project, follow these steps:
@@ -36,8 +29,8 @@ To use this project, follow these steps:
 2. **Export iTunes library to {ROOT}/res/.** Typically this involves opening iTunes and selecting _File > Library > Export Library..._
 Apple should default to the name of _Library.xml_, but other names are fine too.
 Make sure you export this to the resources directory of the repository.
-3. **Create a Spotify credentials file.**
-The default name for the Spotify credentials file is _spotify_credentials.txt_.
+3. **Create a Spotify credentials file in the resources (res/) directory.**
+The recommended name for the Spotify credentials file is _spotify_credentials.txt_.
 The Spotify credentials file should follow this format:
 ```
 <username>
@@ -45,7 +38,7 @@ The Spotify credentials file should follow this format:
 <client secret>
 [comma-separated list of playlists names to ignore]
 ```
-
+To get your client ID and secret, checkout the [Authorization Guide](https://developer.spotify.com/documentation/general/guides/authorization-guide/).
 This transfer utility does _NOT_ assume that any playlists should be ignored. 
 There are some playlists that probably should be ignored though. For example:
 ```
@@ -53,3 +46,8 @@ All,Music,Movies,TV Shows,Podcasts,Audiobooks,Library,Purchased,Recently Added,R
 ```
 4. **Run _transfer.py_.**
 **_CAUTION_**: This should clear all playlists on your Spotify account and make it completely automated through this script.
+
+# Help
+If you run into HTTP issues, I recommend looking at
+[Spotify's developer documentation](https://developer.spotify.com/documentation/web-api/) 
+for a match/explanation of the error code they provide.

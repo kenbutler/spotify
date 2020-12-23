@@ -2,6 +2,7 @@ import logging
 import os
 import sys
 import time
+from pprint import pprint
 
 import spotipy
 from spotipy.oauth2 import SpotifyOAuth
@@ -112,12 +113,33 @@ def add_tracks(auth_mgr: SpotifyOAuth, playlist_id: str, track_ids: list):
     :param auth_mgr: Authorization manager
     :param playlist_id: Spotify playlist ID
     :param track_ids: List of Spotify track IDs
-    :return: Result of POST
+    :return: None
     """
     auth_mgr.scope = "playlist-modify-public"
     sp = spotipy.Spotify(auth_manager=auth_mgr)
-    res = sp.playlist_add_items(playlist_id, track_ids)
-    return res
+    """
+    Spotify lets you post up to 100 tracks to a playlist at once
+    Use list comprehension to break track ID list into chunks
+    """
+    post_limit = 100
+    chunked_track_ids = [track_ids[i:i + post_limit] for i in range(0, len(track_ids), post_limit)]
+    for chunk in chunked_track_ids:
+        sp.playlist_add_items(playlist_id, chunk)
+    return
+
+
+def clean_song_name(song_name: str):
+    things_to_remove = [" - Single", " (Radio Edit)", " (Single Version)", "(", ")", "- "]
+    for item in things_to_remove:
+        song_name = song_name.replace(item, '')
+    # Remove "(feat. OTHER_ARTIST_HERE)"
+    idx_feat = song_name.find("(feat")
+    if idx_feat >= 0:
+        song_name = song_name[0:idx_feat]
+    # Clean up / trim
+    song_name = song_name.replace('  ', ' ')
+    song_name = song_name.strip()
+    return song_name
 
 
 def search(auth_mgr: SpotifyOAuth, track_name: str = None, artist: str = None, album: str = None):
@@ -139,24 +161,47 @@ def search(auth_mgr: SpotifyOAuth, track_name: str = None, artist: str = None, a
     #         query += search_field + " "
     # query = quote(query.strip())  # Remove trailing white-spaces and codify for URL query
 
-    results = sp.search(track_name.strip())
+    # Clean up track name
+    clean_track = clean_song_name(track_name)
+
+    results = sp.search(clean_track.strip())
     id_matches = []
     for n, listing in enumerate(results['tracks']['items']):
+        # Track
         res_track = listing['name']
-        if track_name is not None and track_name.lower() != res_track.lower():
+        res_track = clean_song_name(res_track)
+        if track_name is not None and clean_track.lower() != res_track.lower():
+            logging.debug("mistmatched track - {} != {}".format(clean_track.lower(), res_track.lower()))
             continue
+
+        # Artist
         res_artist = listing['artists'][0]['name']
-        if artist is not None and artist.lower() != res_artist.lower():
+        if artist is not None and \
+                not (artist.lower() == res_artist.lower() or
+                     artist.lower() in res_artist.lower() or
+                     res_artist.lower() in artist.lower()):
+            logging.debug("mistmatched artist - {} != {}".format(artist.lower(), res_artist.lower()))
             continue
+
+        # Album
         res_album = listing['album']['name']
         if album is not None and album.lower() != res_album.lower():
+            # NOTE: Album names are proving to my the trickiest match...avoid them for now
+            logging.debug("mistmatched album - {} != {}".format(album.lower(), res_album.lower()))
             continue
+
+        # Spotify track ID
         res_id = listing['id']
+
         logging.info("\tFound '{}' by {} on album {} with ID = {}".format(res_track, res_artist, res_album, res_id))
         id_matches.append(res_id)
 
     if not id_matches:
+        debug_data = [(item['name'], item['artists'][0]['name']) for item in results['tracks']['items']]
         logging.warning("\tNo matches found")
+        logging.warning("\tFailed track names:")
+        for item in debug_data:
+            logging.warning("\t\t{} by {}".format(item[0], item[1]))
     if len(id_matches) > 1:
         logging.warning("\tAmbiguous matches found")
 
@@ -190,9 +235,7 @@ def main():
     # Populate each iTunes playlist in Spotify
     itunes_to_spotify_song_ids = {}  # Dictionary/map of iTunes song ID's to Spotify song ID's
     for key, (playlist_name, itunes_song_ids) in itunes_playlists.items():
-
-        # Create empty playlist in Spotify
-        playlist_id = create_playlist(auth_mgr, username, playlist_name)
+        logging.info("Preparing playlist '{}'...".format(playlist_name))
 
         # Collect Spotify track IDs to add to new playlist
         tracks_to_add = []
@@ -206,7 +249,7 @@ def main():
 
             # We haven't found this track yet. Let's find it and update accordingly
             track_name, artist, album = itunes_songs[song_id]  # Get iTunes song data
-            id_matches = search(auth_mgr=auth_mgr, track_name=track_name, artist=artist, album=album)
+            id_matches = search(auth_mgr=auth_mgr, track_name=track_name, artist=artist)  # , album=album)
             if not id_matches:  # No match found
                 num_no_matches += 1
                 continue
@@ -217,8 +260,18 @@ def main():
                 if len(id_matches) > 1:
                     num_ambiguous_matches += 1
 
+        if len(tracks_to_add) < 15:  # Spotify will add songs if your playlist is less than 15 tracks long
+            logging.warning("Playlist '{}' had too few found tracks (only {}), so not adding to Spotify"
+                            .format(playlist_name, len(tracks_to_add)))
+            continue
+
+        # Create empty playlist in Spotify
+        playlist_id = create_playlist(auth_mgr, username, playlist_name)
+
         # Add to Spotify playlist
         add_tracks(auth_mgr, playlist_id, tracks_to_add)
+
+        logging.info("Playlist '{}' created".format(playlist_name))
 
     end = time.time()
     logging.info("Total transfer duration: {} seconds".format(round(end - start, 2)))
@@ -231,7 +284,8 @@ def main():
         id_matches = search(auth_mgr=auth_mgr, track_name="On Melancholy Hill", artist='Gorillaz')
         # Create playlist
         create_playlist(auth_mgr, username, 'testAPI')
-        matches = search(auth_mgr, track_name=itunes_songs['5140'][0], artist=itunes_songs['5140'][1], album=itunes_songs['5140'][2])
+        matches = search(auth_mgr, track_name=itunes_songs['5140'][0], artist=itunes_songs['5140'][1],
+                         album=itunes_songs['5140'][2])
 
     pass
 
