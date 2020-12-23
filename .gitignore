@@ -1,6 +1,12 @@
+# Python Compilation
 *.pyc
 .cache
+
+# Editors
+.vscode/
 .idea/
+
+# Resources files
+res/*.xml
+res/*.txt
 *.log
-*.txt
-*.xml
