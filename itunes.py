@@ -14,10 +14,28 @@ logging.getLogger().addHandler(logging.StreamHandler(sys.stdout))
 
 def _create_itunes_tuple(song):
     keys = [entry.text for entry in song.findall('key')]
+
+    # Get song name. Assuming all songs have a name here.
     idx_song = 2 * keys.index('Name') + 1
-    idx_artist = 2 * keys.index('Artist') + 1
-    idx_album = 2 * keys.index('Album') + 1
-    return song[idx_song].text, song[idx_artist].text, song[idx_album].text
+    song_name = song[idx_song].text
+
+    # Get artist -- which may not be known/present
+    try:
+        idx_artist = 2 * keys.index('Artist') + 1
+        artist = song[idx_artist].text
+    except ValueError:
+        logging.warning("No artist present for '{}'".format(song_name))
+        artist = None
+
+    # Get album -- which may not be known/present
+    try:
+        idx_album = 2 * keys.index('Album') + 1
+        album = song[idx_album].text
+    except ValueError:
+        logging.warning("No album present for '{}'".format(song_name))
+        album = None
+
+    return song_name, artist, album
 
 
 def read_itunes_library(xml_file_path: str, playlists_to_ignore: list = None):
@@ -60,7 +78,7 @@ def read_itunes_library(xml_file_path: str, playlists_to_ignore: list = None):
         all_keys = [entry.text for entry in playlist.findall('key')]  # Get keys in playlist
 
         # Get title
-        idx_title = 2 * all_keys.index('Name')
+        idx_title = 2 * all_keys.index('Name') + 1
         title = playlist[idx_title].text
 
         # Check if we're choosing to ignore this playlist in the transfer

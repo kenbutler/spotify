@@ -38,7 +38,7 @@ def get_credentials(directory: str = os.path.expanduser('~'), filename: str = '.
             logging.info("Ignoring playlists: {}".format([i for i in playlists_to_ignore]))
         redirect_uri = "http://localhost:8080"
         logging.info("Acquired credentials")
-        return username, SpotifyOAuth(client_id=id_num, client_secret=secret, redirect_uri=redirect_uri),\
+        return username, SpotifyOAuth(client_id=id_num, client_secret=secret, redirect_uri=redirect_uri), \
                playlists_to_ignore
 
 
