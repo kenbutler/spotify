@@ -51,6 +51,7 @@ You might otherwise end up with a merging of two different playlists with the sa
 - Spotify's REST API places limits on queries.
 For example, you can only query the names of 50 playlists at a time, or add 100 tracks to a playlist at a time.
 I've handled these sort of limits (at least the ones I've encountered so far) in the code.
+- iTunes playlists will maintain the same order (as seen in iTunes) when transferred to Spotify
 
 # Help
 If you run into HTTP issues, I recommend looking at
