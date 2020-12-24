@@ -2,7 +2,7 @@ import logging
 import os
 import sys
 import time
-from pprint import pprint
+from datetime import datetime
 
 import spotipy
 from spotipy.oauth2 import SpotifyOAuth
@@ -10,7 +10,7 @@ from spotipy.oauth2 import SpotifyOAuth
 from itunes import read_itunes_library
 
 logging.basicConfig(
-    filename=os.path.join(os.getcwd(), "transfer.log"),
+    filename=os.path.join(os.getcwd(), "transfer" + datetime.now().strftime("%d-%b-%Y") + ".log"),
     filemode='w',
     format='%(asctime)s %(levelname)-8s %(message)s',
     level=logging.INFO,
@@ -129,6 +129,14 @@ def add_tracks(auth_mgr: SpotifyOAuth, playlist_id: str, track_ids: list):
 
 
 def clean_song_name(song_name: str):
+    """
+    Cleans song name for purpose of future comparison against another, cleaned song name
+    By "cleaning", I mean remove irrelevant additions to the song name, such as "- Single".
+    This is necessary because the music industry clearly doesn't know how to maintain a central database with consistent
+    song, artist and album names. Ridiculous.
+    :param song_name: Name of song
+    :return: "Cleaned" name of song
+    """
     things_to_remove = [" - Single", " (Radio Edit)", " (Single Version)", "(", ")", "- "]
     for item in things_to_remove:
         song_name = song_name.replace(item, '')
@@ -213,8 +221,6 @@ def main():
     Main executor
     :return: None
     """
-
-    debug = False
     start = time.time()
 
     # Acquire credentials
@@ -278,16 +284,6 @@ def main():
     logging.info("{} tracks had no match".format(num_no_matches))
     logging.info("{} tracks had ambiguous matches".format(num_ambiguous_matches))
     logging.info("{} tracks added".format(num_tracks_added))
-
-    if debug:
-        # Search for "Feel Good Inc" by Gorillaz
-        id_matches = search(auth_mgr=auth_mgr, track_name="On Melancholy Hill", artist='Gorillaz')
-        # Create playlist
-        create_playlist(auth_mgr, username, 'testAPI')
-        matches = search(auth_mgr, track_name=itunes_songs['5140'][0], artist=itunes_songs['5140'][1],
-                         album=itunes_songs['5140'][2])
-
-    pass
 
 
 if __name__ == '__main__':

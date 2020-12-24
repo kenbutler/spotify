@@ -12,22 +12,6 @@ Python 3.7+
 
 See _requirements.txt_ for required Python packages
 
-# Caveats
-Learned a few things in this little escapade.
-- Spotify will not have access to _everything_ that is in your iTunes library.
-This is often either because
-    - Record agreements differing between Apple and Spotify, or
-    - You got songs from another application (_\*cough\*_illegally downloaded?_\*cough\*_) that had horribly-mangled track or artist names, which makes it hard to find matches.
-- While iTunes allows you to create folders for playlists, these folders are actually playlists themselves.
-No folders actually exist. I do a check to ensure no folders are added.
-- Playlist names must be unique.
-Though iTunes allows you to name playlists with duplicate names, they still track them behind the scenes with unique IDs.
-When transferring playlists to Spotify, though, it's pretty important to make sure all your iTunes playlist names are unique.
-You might otherwise end up with a merging of two different playlists with the same name.
-- Spotify's REST API places limits on queries.
-For example, you can only query the names of 50 playlists at a time, or add 100 tracks to a playlist at a time.
-I've handled these sort of limits (at least the ones I've encountered so far) in the code.
-
 # How to Use
 To use this project, follow these steps:
 1. **Clone down this repository.** Let's call the location of this repository _{ROOT}_
@@ -51,6 +35,22 @@ All,Music,Movies,TV Shows,Podcasts,Audiobooks,Library,Purchased,Recently Added,R
 ```
 4. **Run _transfer.py_.**
 **_CAUTION_**: This should clear all playlists on your Spotify account and make it completely automated through this script.
+
+# Caveats
+Learned a few things in this little escapade.
+- Spotify will not have access to _everything_ that is in your iTunes library.
+This is often either because
+    - Record agreements differing between Apple and Spotify, or
+    - You got songs from another application (_\*cough\*_ illegally downloaded? _\*cough\*_) that had horribly-mangled track or artist names, which makes it hard to find matches.
+- While iTunes allows you to create folders for playlists, these folders are actually playlists themselves.
+No folders actually exist. I do a check to ensure no folders are added.
+- Playlist names must be unique.
+Though iTunes allows you to name playlists with duplicate names, they still track them behind the scenes with unique IDs.
+When transferring playlists to Spotify, though, it's pretty important to make sure all your iTunes playlist names are unique.
+You might otherwise end up with a merging of two different playlists with the same name.
+- Spotify's REST API places limits on queries.
+For example, you can only query the names of 50 playlists at a time, or add 100 tracks to a playlist at a time.
+I've handled these sort of limits (at least the ones I've encountered so far) in the code.
 
 # Help
 If you run into HTTP issues, I recommend looking at
